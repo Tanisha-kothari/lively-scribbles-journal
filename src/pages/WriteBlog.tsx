@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,9 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBlog } from "@/contexts/BlogContext";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { BlogCoverUpload } from "@/components/BlogCoverUpload";
 import { Card, CardContent } from "@/components/ui/card";
+import { FileText, Save } from "lucide-react";
 
 export default function WriteBlog() {
   const [title, setTitle] = useState("");
@@ -25,7 +26,6 @@ export default function WriteBlog() {
       navigate("/login");
     }
     
-    // Reset form state when component mounts to ensure clean editor state
     setTitle("");
     setContent("");
     setCoverImage(undefined);
@@ -99,83 +99,60 @@ export default function WriteBlog() {
   };
 
   return (
-    <div className="container py-8">
-      <Card>
-        <CardContent className="p-6">
-          <h1 className="text-3xl font-bold font-heading mb-6">Write a New Blog</h1>
-          
-          <form onSubmit={handleSubmit} className="space-y-6" dir="ltr">
-            <div className="space-y-2">
-              <Label htmlFor="title">Blog Title</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter a catchy title"
-                className="text-lg"
-                required
-                dir="ltr"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="coverImage">Cover Image (Optional)</Label>
-              <div className="flex items-center gap-4">
-                <Input
-                  id="coverImage"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleCoverImageUpload}
-                  className="max-w-md"
-                />
-              </div>
-              {coverImage && (
-                <div className="mt-2">
-                  <div className="relative aspect-video max-w-md overflow-hidden rounded-md">
-                    <img
-                      src={coverImage}
-                      alt="Cover preview"
-                      className="object-cover w-full h-full"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={() => setCoverImage(undefined)}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="content">Content</Label>
-              <RichTextEditor
-                value={content}
-                onChange={setContent}
-                onImageUpload={handleImageUpload}
-              />
-            </div>
-            
-            <div className="flex justify-end gap-4 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate("/")}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting || !title.trim() || !content.trim()}
-              >
-                {isSubmitting ? "Publishing..." : "Publish Blog"}
-              </Button>
-            </div>
-          </form>
+    <div className="container max-w-5xl py-8 animate-fade-in">
+      <div className="flex items-center justify-between mb-8">
+        <div className="space-y-1">
+          <h1 className="text-4xl font-bold font-heading tracking-tight">Create Your Story</h1>
+          <p className="text-muted-foreground">Share your thoughts with the world</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            onClick={() => navigate("/")}
+            className="gap-2"
+          >
+            <FileText className="w-4 h-4" />
+            Draft
+          </Button>
+          <Button 
+            type="submit"
+            onClick={handleSubmit}
+            disabled={isSubmitting || !title.trim() || !content.trim()}
+            className="gap-2"
+          >
+            <Save className="w-4 h-4" />
+            {isSubmitting ? "Publishing..." : "Publish"}
+          </Button>
+        </div>
+      </div>
+
+      <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
+        <CardContent className="p-6 space-y-8">
+          <div>
+            <BlogCoverUpload
+              coverImage={coverImage}
+              onImageUpload={handleCoverImageUpload}
+              onRemoveImage={() => setCoverImage(undefined)}
+            />
+          </div>
+
+          <div>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter your story title..."
+              className="border-none bg-transparent px-0 text-4xl font-bold placeholder:text-muted-foreground/50 focus-visible:ring-0"
+              dir="ltr"
+            />
+          </div>
+
+          <div className="prose prose-lg prose-stone dark:prose-invert">
+            <RichTextEditor
+              value={content}
+              onChange={setContent}
+              onImageUpload={handleImageUpload}
+            />
+          </div>
         </CardContent>
       </Card>
     </div>
