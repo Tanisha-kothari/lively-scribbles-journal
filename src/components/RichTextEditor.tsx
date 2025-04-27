@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Bold,
@@ -21,6 +21,14 @@ interface RichTextEditorProps {
 export function RichTextEditor({ value, onChange, onImageUpload }: RichTextEditorProps) {
   const [editorContent, setEditorContent] = useState(value);
   const editorRef = React.useRef<HTMLDivElement>(null);
+
+  // Initialize editor content from props
+  useEffect(() => {
+    if (editorRef.current && value !== editorContent) {
+      editorRef.current.innerHTML = value;
+      setEditorContent(value);
+    }
+  }, [value]);
 
   const handleChange = useCallback(() => {
     if (editorRef.current) {
@@ -159,7 +167,10 @@ export function RichTextEditor({ value, onChange, onImageUpload }: RichTextEdito
         dangerouslySetInnerHTML={{ __html: editorContent }}
         onInput={handleChange}
         className="p-4 min-h-[200px] focus:outline-none prose prose-sm max-w-none"
-        style={{ minHeight: "300px" }}
+        style={{ 
+          minHeight: "300px",
+          direction: "ltr" // Ensure text direction is left-to-right
+        }}
       />
     </div>
   );
