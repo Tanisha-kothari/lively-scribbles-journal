@@ -24,6 +24,11 @@ export default function WriteBlog() {
     if (!isAuthenticated) {
       navigate("/login");
     }
+    
+    // Reset form state when component mounts to ensure clean editor state
+    setTitle("");
+    setContent("");
+    setCoverImage(undefined);
   }, [isAuthenticated, navigate]);
 
   const handleImageUpload = async (file: File): Promise<string> => {
@@ -99,7 +104,7 @@ export default function WriteBlog() {
         <CardContent className="p-6">
           <h1 className="text-3xl font-bold font-heading mb-6">Write a New Blog</h1>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" dir="ltr">
             <div className="space-y-2">
               <Label htmlFor="title">Blog Title</Label>
               <Input
@@ -109,6 +114,7 @@ export default function WriteBlog() {
                 placeholder="Enter a catchy title"
                 className="text-lg"
                 required
+                dir="ltr"
               />
             </div>
             

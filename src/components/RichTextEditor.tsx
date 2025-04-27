@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Bold,
@@ -20,25 +20,48 @@ interface RichTextEditorProps {
 
 export function RichTextEditor({ value, onChange, onImageUpload }: RichTextEditorProps) {
   const [editorContent, setEditorContent] = useState(value);
-  const editorRef = React.useRef<HTMLDivElement>(null);
-
+  const editorRef = useRef<HTMLDivElement>(null);
+  
   // Initialize editor content from props
   useEffect(() => {
     if (editorRef.current && value !== editorContent) {
       editorRef.current.innerHTML = value;
       setEditorContent(value);
     }
-  }, [value]);
+  }, [value, editorContent]);
 
-  // Fix text direction issues when the editor mounts
+  // Fix text direction issues when the editor mounts and ensure proper initialization
   useEffect(() => {
     if (editorRef.current) {
-      // Ensure the editor always has LTR direction
-      editorRef.current.dir = "ltr";
-      editorRef.current.style.direction = "ltr";
+      const editor = editorRef.current;
       
-      // Force textarea to behave correctly
-      editorRef.current.setAttribute("data-text-direction", "ltr");
+      // Force LTR direction with multiple approaches
+      editor.dir = "ltr";
+      editor.style.direction = "ltr";
+      editor.style.textAlign = "left";
+      editor.setAttribute("data-text-direction", "ltr");
+      
+      // Create a MutationObserver to maintain LTR direction
+      const observer = new MutationObserver(() => {
+        if (editor.dir !== "ltr") {
+          editor.dir = "ltr";
+        }
+        if (editor.style.direction !== "ltr") {
+          editor.style.direction = "ltr";
+        }
+      });
+      
+      // Start observing the editor for changes
+      observer.observe(editor, { 
+        attributes: true, 
+        childList: true,
+        subtree: true,
+        characterData: true
+      });
+      
+      return () => {
+        observer.disconnect();
+      };
     }
   }, []);
 
@@ -182,8 +205,9 @@ export function RichTextEditor({ value, onChange, onImageUpload }: RichTextEdito
         className="p-4 min-h-[200px] focus:outline-none prose prose-sm max-w-none"
         style={{ 
           minHeight: "300px",
-          direction: "ltr", // Ensure text direction is left-to-right
-          unicodeBidi: "isolate" // Additional control over text direction
+          direction: "ltr", 
+          textAlign: "left",
+          unicodeBidi: "isolate"
         }}
       />
     </div>
