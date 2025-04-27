@@ -151,6 +151,7 @@ export default function WriteBlog() {
               value={content}
               onChange={setContent}
               onImageUpload={handleImageUpload}
+               dir="ltr" 
             />
           </div>
         </CardContent>
