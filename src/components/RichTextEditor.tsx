@@ -30,6 +30,18 @@ export function RichTextEditor({ value, onChange, onImageUpload }: RichTextEdito
     }
   }, [value]);
 
+  // Fix text direction issues when the editor mounts
+  useEffect(() => {
+    if (editorRef.current) {
+      // Ensure the editor always has LTR direction
+      editorRef.current.dir = "ltr";
+      editorRef.current.style.direction = "ltr";
+      
+      // Force textarea to behave correctly
+      editorRef.current.setAttribute("data-text-direction", "ltr");
+    }
+  }, []);
+
   const handleChange = useCallback(() => {
     if (editorRef.current) {
       const content = editorRef.current.innerHTML;
@@ -164,12 +176,14 @@ export function RichTextEditor({ value, onChange, onImageUpload }: RichTextEdito
       <div
         ref={editorRef}
         contentEditable
+        dir="ltr"
         dangerouslySetInnerHTML={{ __html: editorContent }}
         onInput={handleChange}
         className="p-4 min-h-[200px] focus:outline-none prose prose-sm max-w-none"
         style={{ 
           minHeight: "300px",
-          direction: "ltr" // Ensure text direction is left-to-right
+          direction: "ltr", // Ensure text direction is left-to-right
+          unicodeBidi: "isolate" // Additional control over text direction
         }}
       />
     </div>
